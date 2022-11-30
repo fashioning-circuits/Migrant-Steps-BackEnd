@@ -1,0 +1,32 @@
+{
+  "name": "back-end",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "connect-sqlite3": "^0.9.13",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "fitbit-node": "^2.2.0",
+    "mongoose": "^6.7.3",
+    "nodemon": "^2.0.20"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fashioning-circuits/MigrantStepsNodeJS.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fashioning-circuits/MigrantStepsNodeJS/issues"
+  },
+  "homepage": "https://github.com/fashioning-circuits/MigrantStepsNodeJS#readme"
+}
