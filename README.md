@@ -9,7 +9,7 @@ This NodeJS application allows us to connect with Fitbit APIs and store/access d
 	git clone https://github.com/fashioning-circuits/MigrantStepsNodeJS.git
 ```
 
-3. Install all the app dependencies by running the command below in the main directory of the projec4
+3. Install all the app dependencies by running the command below in the main directory of the project
 ```
 	npm install
 ```
