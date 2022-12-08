@@ -16,5 +16,5 @@ This NodeJS application allows us to connect with Fitbit APIs and store/access d
 
 4. Run the NodeJS application:
 ```
-  npm start
+        npm start
 ```
