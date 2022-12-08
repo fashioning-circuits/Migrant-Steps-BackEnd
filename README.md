@@ -13,8 +13,9 @@ This NodeJS application allows us to connect with Fitbit APIs and store/access d
 ```
 	npm install
 ```
+4. Update the ``.env`` file with the correct values
 
-4. Run the NodeJS application:
+5. Run the NodeJS application:
 ```
         npm start
 ```
