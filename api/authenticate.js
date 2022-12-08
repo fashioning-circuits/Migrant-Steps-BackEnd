@@ -3,7 +3,14 @@ const router = express.Router();
 require('dotenv/config'); //Specify all credentials in .env
 const Token = require('../models/Token');
 
-// initialize the Fitbit API client
+
+/*
+Functionality: Initializes the Fitbit API client
+Params:
+    - clientId: The fitbit client's ID from the dev portal
+    - clientSecret: The fitbit client's secret from the dev portal
+Returns: FitbitApiClient
+*/
 const FitbitApiClient = require('fitbit-node');
 const client = new FitbitApiClient({
 	clientId: process.env.CLIENT_ID,
@@ -11,6 +18,14 @@ const client = new FitbitApiClient({
 	apiVersion: '1.2' // 1.2 is the default
 });
 
+
+/*
+Functionality: The endpoint that redirects the application for authentication
+    -> Currently redirects to homepage if user session has been established
+    -> Otherwise, initiates the authentication step
+Params:
+Returns: GetToken endpoint
+*/
 let token = null;
 router.get('/', (req, res) => {
     console.log(req.session);
@@ -23,7 +38,12 @@ router.get('/', (req, res) => {
 });
 
 
-// redirect the user to the Fitbit authorization page
+/*
+Functionality: The endpoint redirects the user to the Fitbit authorization page
+Params:
+    - scope: specifies access to various parts of the user's fitbit data
+Returns: <REDIRECT URL>
+*/
 router.get('/authorize', async (req, res) => {
 	// request access to the user's activity, heartrate, location, nutrion, profile, settings, sleep, social, and weight scopes
 	const authorize_url = await client.getAuthorizeUrl('activity heartrate location nutrition profile settings sleep social weight', process.env.REDIRECT_URL);
@@ -32,7 +52,14 @@ router.get('/authorize', async (req, res) => {
 });
 
 
-// handle the callback from the Fitbit authorization flow
+/*
+Functionality: This endpoint handles the callback action from the Fitbit authorization flow
+    -> Fetches the Fitbit Token based on the Token model
+    -> Stores the new token in the session
+Params:
+    - REDIRECT_URL: Uses the redirect url from the env file
+Returns: /savetoken
+*/
 router.get('/callback', async (req, res) => {
 	// exchange the authorization code we just received for an access token
     console.log("Callback URL called!");
@@ -48,7 +75,14 @@ router.get('/callback', async (req, res) => {
 });
 
 
-// refresh token if expired
+/*
+Functionality: The endpoint refreshes an expired access token
+Params:
+    - access_token: specify the old access token
+    - refresh_token: specify the valid, unexpired refresh token
+    - expires_in: specify the time in milliseconds (upto 8 hrs equivalent) for the validity of new access token
+Returns: /savetoken
+*/
 router.get('/refreshtoken', async (req, res) => {
     console.log("Refresh Token called!");
     console.log(req.session);
@@ -68,7 +102,12 @@ router.get('/refreshtoken', async (req, res) => {
 });
 
 
-//Saves the token to DB
+/*
+Functionality: The endpoint saves the token to the MongoDB
+Params:
+    - Token: Saves/Updates the specified token to DB
+Returns: /home
+*/
 router.get('/savetoken', async (req, res) => {
     console.log("savetoken called!");
     try {
@@ -95,7 +134,12 @@ router.get('/savetoken', async (req, res) => {
 });
 
 
-//Gets a saved token from db else restarts the authorization process
+/*
+Functionality: Gets a saved token from MongoDB else restarts the authorization process
+Params:
+    - session: uses the current session for verifying whether a token exists or not
+Returns: /authorize
+*/
 router.get('/gettoken', async (req, res) => {
     console.log("GetToken called!");
     if(!req.session.token) //check if user id exists in our session
@@ -120,6 +164,12 @@ router.get('/gettoken', async (req, res) => {
 });
 
 
+/*
+Functionality: The endpoint logs out the signed in user
+Params:
+    - user_id: fetches the current user_id to log out
+Returns: /loggedout
+*/
 //Logs out the user and removes the tokens from db
 router.get('/logout', async (req, res) => {
     console.log("Logout called!");

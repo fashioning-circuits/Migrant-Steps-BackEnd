@@ -1,4 +1,6 @@
 console.clear();
+
+// Basic NodeJS library imports
 const express = require('express');
 const cookieParser = require("cookie-parser");
 const sessions = require('express-session');
@@ -15,20 +17,19 @@ app.use(cors());
 
 const port = process.env.PORT || 3000;
 
-
-// creating 24 hours from milliseconds
+// thirty days in terms of milliseconds
 const thirtyDays = 1000 * 60 * 60 * 24 * 30;
 
 
 /*
 Functionality: This method sets up the user session in the browser
 Params:
-    - secret:
-    - saveUninitialized:
-    - cookie: 
-    - resave:
-    - store:
-Returns:
+    - secret: The security code from the .env for securing the browser session
+    - saveUninitialized: Save the model even if it's unintialized (Recommendation: Let it be as it is)
+    - cookie: The time period for keeping a cookie alive (This basically tells how often do you want the user to log in to fitbit)
+    - resave: Resave the session even if it wasn't updated (Recommendation: Let it be as it is)
+    - store: The SQLite session store -> essentially, rather than storing on system RAM, we store the session on disk
+Returns: Session
 */
 app.use(sessions({
     secret: process.env.SESSION_SECRET,
@@ -43,7 +44,13 @@ app.use(sessions({
 app.use(cookieParser());
 
 
-// initialize the Fitbit API client
+/*
+Functionality: Initializes the Fitbit API client
+Params:
+    - clientId: The fitbit client's ID from the dev portal
+    - clientSecret: The fitbit client's secret from the dev portal
+Returns: FitbitApiClient
+*/
 const FitbitApiClient = require('fitbit-node');
 const client = new FitbitApiClient({
 	clientId: process.env.CLIENT_ID,
@@ -51,10 +58,24 @@ const client = new FitbitApiClient({
 	apiVersion: '1.2' // 1.2 is the default
 });
 
+
+/*
+Functionality: Initializes the Authenticate middleware
+Params:
+    - </path> : specify the sub-path for accessing the authenticate middleware
+Returns: authRoute
+*/
 const authRoute = require('./api/authenticate');
 app.use('/authenticate', authRoute);
 
-//Default action is to authenticate and send to homepage
+
+/*
+Functionality: The page to display website is accessed at the root level
+    -> Currently redirects to homepage if user session has been established
+    -> Otherwise, initiates the authentication step
+Params:
+Returns: /home
+*/
 app.get('/', (req, res) => {
 	if(req.session.token)
         res.redirect('/home');
@@ -63,18 +84,29 @@ app.get('/', (req, res) => {
 });
 
 
-//Page to display once user has logged in -> aka Homepage
+/*
+Functionality: This endpoint displays the homepage once the user has successfully logged in
+    -> At present, it displays various options for accessing fitbit data
+Params:
+Returns: Homepage
+*/
 app.get('/home', (req, res) => {
     req.session.save();
     console.log(req.session);
     console.log("Login successful!");
-    res.send(`Welcome User<br><a href=\'/profile\'>click to view profile</a>
-    <br><a href=\'/steps\'>click to view steps data</a>
+    res.send(`Welcome User<br><a href=\'/profile\'>Click to view profile</a>
+    <br><a href=\'/steps\'>Click to view steps data</a>
+    <br><a href=\'/distance\'>Click to view distance data</a>
     <br><br><a href=\'/authenticate/logout\'>Logout</a>`);
 });
 
 
-//Page to display once user has logged out
+/*
+Functionality: The endpoint to navigate to once the user has successfully logged out
+    -> At present, this page would ideally have the path for asking the user to log back in
+Params:
+Returns: Logout page
+*/
 app.get('/loggedout', (req, res) => {
     console.log(req.session);
     console.log("Logout successful!");
@@ -82,7 +114,13 @@ app.get('/loggedout', (req, res) => {
 });
 
 
-//Get the user profile
+/*
+Functionality: This endpoint fetches the user's profile data stored in their FitBit account
+    -> Ensures that the user is logged in, else it will initiate the authentication flow
+    -> Fetches the profile data from the user's fitbit account
+Params:
+Returns: Displays the profile data in JSON format
+*/
 app.get('/profile', (req, res) => {
     if(!req.session.token)
         return res.redirect('/authenticate');
@@ -97,7 +135,13 @@ app.get('/profile', (req, res) => {
 });
 
 
-//Get the user steps data
+/*
+Functionality: This endpoint fetches the user's steps data stored in their FitBit account
+    -> Ensures that the user is logged in, else it will initiate the authentication flow
+    -> Fetches the steps data from the user's fitbit account
+Params:
+Returns: Displays the steps data in JSON format. Also displays the total step count in the last 30 days
+*/
 app.get('/steps', (req, res) => {
     if(!req.session.token)
         return res.redirect('/authenticate');
@@ -119,13 +163,19 @@ app.get('/steps', (req, res) => {
 });
 
 
-//Get the user distance data
+/*
+Functionality: This endpoint fetches the user's distance data stored in their FitBit account
+    -> Ensures that the user is logged in, else it will initiate the authentication flow
+    -> Fetches the distance data from the user's fitbit account
+Params:
+Returns: Displays the distance data in JSON format
+*/
 app.get('/distance', (req, res) => {
     if(!req.session.token)
         return res.redirect('/authenticate');
 
     console.log('Fetching steps');
-    // use the access token to fetch the user's steps data
+    // use the access token to fetch the user's distance data
     client.get("/activities/distance/date/today/30d.json", req.session.token.access_token).then(results => {
         res.send(JSON.stringify(results[0]));
     }).catch(err => {
@@ -134,7 +184,11 @@ app.get('/distance', (req, res) => {
 });
 
 
-//MongDB connection
+/*
+Functionality: Establishes the MongoDB connection from our backend application using the Mongoose package
+Params:
+Returns: Prints a message in the console on a successful connection to MongoDB
+*/
 mongoose.connect(
     process.env.DB_CONNECTION, 
     () => {
@@ -143,6 +197,11 @@ mongoose.connect(
 );
 
 
+/*
+Functionality: The final part of the application that launches it in the browser.
+Params:
+Returns: Prints a message in the console on a successful launch of the application
+*/
 app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
+    console.log(`Migrant Steps app listening on port ${port}`)
 });
