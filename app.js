@@ -189,6 +189,7 @@ Functionality: Establishes the MongoDB connection from our backend application u
 Params:
 Returns: Prints a message in the console on a successful connection to MongoDB
 */
+mongoose.set("strictQuery", false);
 mongoose.connect(
     process.env.DB_CONNECTION, 
     () => {
