@@ -46,7 +46,7 @@ Returns: <REDIRECT URL>
 */
 router.get('/authorize', async (req, res) => {
 	// request access to the user's activity, heartrate, location, nutrion, profile, settings, sleep, social, and weight scopes
-	const authorize_url = await client.getAuthorizeUrl('activity heartrate location nutrition profile settings sleep social weight', process.env.REDIRECT_URL);
+	const authorize_url = await client.getAuthorizeUrl('activity heartrate location nutrition profile settings sleep social weight', process.env.REDIRECT_URL, "login");
     console.log(authorize_url);
     res.redirect(authorize_url);
 });
