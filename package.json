@@ -18,9 +18,9 @@
     "express-session": "^1.17.3",
     "fitbit-node": "^2.2.0",
     "mongoose": "^6.7.3",
+    "nodemailer": "^6.9.16",
     "nodemon": "^2.0.20"
   },
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fashioning-circuits/MigrantStepsNodeJS.git"

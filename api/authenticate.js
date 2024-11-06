@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 require('dotenv/config'); //Specify all credentials in .env
 const Token = require('../models/Token');
+const User = require('../models/User');
 
 
 /*
@@ -37,6 +38,67 @@ router.get('/', (req, res) => {
     // res.send('Authenticate homepage!');
 });
 
+// This will be changed when implemented with frontend
+router.get('/authorize', async(req, res) => {
+    res.send(`
+        <form action="/authenticate/process-email" method="post">
+            Email: <input type="text" name="email" required><br>
+            <input type="submit" value="Submit">
+        </form>
+    `);
+});
+
+router.post('/process-email', async(req, res) => {
+    const { email } = req.body;
+    const existingUser = await User.findOne({ email: email });
+    if (!existingUser) {
+      return res.send(`Create New User
+        <form action="/authenticate/new-user" method="post">
+            Email: <input type="text" name="email" value="${email}" readonly><br>
+            User Type:<br>
+            <input type="radio" name="user_type" value="Manual" required>Manual<br>
+            <input type="radio" name="user_type" value="FitBit" required>FitBit<br>
+            <input type="submit" value="Submit">
+        </form>
+        `);
+    }
+    console.log("Existing User:");
+    if (existingUser.user_type == "FitBit") {
+        console.log("FitBit");
+        return res.redirect('./authorize-fitbit');
+    }
+    console.log("Manual");
+    return res.redirect('./authorize-otp');
+});
+
+router.post('/new-user', async(req, res) => {
+    try {
+        const { email, user_type } = req.body;
+        if ( !email || !user_type) {
+          return res.status(403).json({
+            success: false,
+            message: 'All fields are required',
+          });
+        }
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+          return res.status(400).json({
+            success: false,
+            message: 'User already exists',
+          });
+        }
+        const newUser = await User.create({
+          email: email,
+          user_type: user_type
+        });
+        console.log ("User registered successfully");
+        console.log (newUser);
+        res.redirect("./authorize");
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ success: false, error: error.message });
+    }
+});
 
 /*
 Functionality: The endpoint redirects the user to the Fitbit authorization page
@@ -44,11 +106,16 @@ Params:
     - scope: specifies access to various parts of the user's fitbit data
 Returns: <REDIRECT URL>
 */
-router.get('/authorize', async (req, res) => {
+router.get('/authorize-fitbit', async (req, res) => {
 	// request access to the user's activity, heartrate, location, nutrion, profile, settings, sleep, social, and weight scopes
 	const authorize_url = await client.getAuthorizeUrl('activity heartrate location nutrition profile settings sleep social weight', process.env.REDIRECT_URL, "login");
     console.log(authorize_url);
     res.redirect(authorize_url);
+});
+
+// Sends a one-time password and awaits authentication
+router.get('/authorize-otp', async(req, res) => {
+    res.send('OTP sending not yet implemented');
 });
 
 
