@@ -43,8 +43,40 @@ links.forEach(l => {
 });
 
 // The user's unlockable node IDs
-const unlockableID = new Set();
-currentID.forEach(i => map[i].forEach(j => unlockableID.add(j)));
-currentID.forEach(i => unlockableID.delete(i)); // Not unlockable if already unlocked
+const unlockable = new Set();
+currentID.forEach(i => map[i].forEach(j => unlockable.add(j)));
+currentID.forEach(i => unlockable.delete(i)); // Not unlockable if already unlocked
 
-module.exports = {map: map, unlockableID: unlockableID, currentID: currentID};
+//module.exports = {map: map, unlockableID: unlockableID, currentID: currentID};
+map.forEach((connections, source) => {
+    connections.forEach(target => {
+      links.push({ source, target });
+    });
+  });
+
+  const width = 600, height = 600;
+  const centerX = width / 2, centerY = height / 2;
+
+  function circularLayout(nodes, radiusIncrement) {
+    const nodesPerCircle = 9;
+    let currentCircle = 0, nodeIndex = 0;
+
+    nodes[nodeIndex].x = centerX;
+    nodes[nodeIndex].y = centerY;
+    nodeIndex++;
+
+    while (nodeIndex < nodes.length) {
+      currentCircle++;
+      const radius = currentCircle * radiusIncrement;
+      const angleStep = (2 * Math.PI) / nodesPerCircle;
+
+      for (let i = 0; i < nodesPerCircle && nodeIndex < nodes.length; i++) {
+        const angle = i * angleStep - Math.PI / 2;
+        nodes[nodeIndex].x = centerX + radius * Math.cos(angle);
+        nodes[nodeIndex].y = centerY + radius * Math.sin(angle);
+        nodeIndex++;
+      }
+    }
+  }
+
+  circularLayout(nodes, 80);

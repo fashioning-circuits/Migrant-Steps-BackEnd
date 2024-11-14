@@ -8,12 +8,12 @@ var SQLiteStore = require('connect-sqlite3')(sessions);
 const mongoose = require('mongoose');  
 const cors = require('cors');
 require('dotenv/config'); //Specify all credentials in .env
-const maps = require("./models/Map.js");
 
 const app = express();
+const path = require('path');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, 'static/')));
 app.use(cors());
 
 const port = process.env.PORT || 3000;
@@ -187,91 +187,7 @@ app.get('/distance', (req, res) => {
 
 // Temporary, displays map
 app.get('/map', (req, res) => {
-    res.send(`
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Interactive Graph</title>
-        <script src="https://d3js.org/d3.v7.min.js"></script>
-        <style>
-          .node { stroke: #000; stroke-width: 1.5px; }
-          .link { stroke: #333; stroke-width: 2px; stroke-opacity: 0.9; }
-          .highlight { fill: red; stroke: red; stroke-width: 3px; }
-        </style>
-      </head>
-      <body>
-        <svg width="600" height="600"></svg>
-        <script>
-          const map = ${JSON.stringify(Array.from(maps.map).map(s => Array.from(s)))};
-          const current = ${JSON.stringify(Array.from(maps.currentID))};
-          const unlockable = ${JSON.stringify(Array.from(maps.unlockableID))};
-          
-          const nodes = map.map((_, index) => ({ id: index }));
-          const links = [];
-  
-          map.forEach((connections, source) => {
-            connections.forEach(target => {
-              links.push({ source, target });
-            });
-          });
-  
-          const width = 600, height = 600;
-          const centerX = width / 2, centerY = height / 2;
-  
-          function circularLayout(nodes, radiusIncrement) {
-            const nodesPerCircle = 9;
-            let currentCircle = 0, nodeIndex = 0;
-  
-            nodes[nodeIndex].x = centerX;
-            nodes[nodeIndex].y = centerY;
-            nodeIndex++;
-  
-            while (nodeIndex < nodes.length) {
-              currentCircle++;
-              const radius = currentCircle * radiusIncrement;
-              const angleStep = (2 * Math.PI) / nodesPerCircle;
-  
-              for (let i = 0; i < nodesPerCircle && nodeIndex < nodes.length; i++) {
-                const angle = i * angleStep - Math.PI / 2;
-                nodes[nodeIndex].x = centerX + radius * Math.cos(angle);
-                nodes[nodeIndex].y = centerY + radius * Math.sin(angle);
-                nodeIndex++;
-              }
-            }
-          }
-  
-          circularLayout(nodes, 80);
-  
-          const svg = d3.select("svg");
-          const link = svg.append("g").attr("class", "links")
-            .selectAll("line")
-            .data(links)
-            .enter().append("line")
-            .attr("class", "link");
-  
-          const node = svg.append("g").attr("class", "nodes")
-            .selectAll("circle")
-            .data(nodes)
-            .enter().append("circle")
-            .attr("class", "node")
-            .attr("r", 10)
-            .attr("fill", d => current.includes(d.id) ? "red" : unlockable.includes(d.id) ? "green" : "black")
-            .on("click", (event, d) => console.log(\`Node clicked: \${d.id}\`));
-  
-          node.append("title").text(d => \`Node \${d.id}\`);
-  
-          link.attr("x1", d => nodes[d.source].x)
-              .attr("y1", d => nodes[d.source].y)
-              .attr("x2", d => nodes[d.target].x)
-              .attr("y2", d => nodes[d.target].y);
-  
-          node.attr("cx", d => d.x).attr("cy", d => d.y);
-        </script>
-      </body>
-      </html>
-    `);
+    res.sendFile(path.join(__dirname, 'static/'));
 });
 
 /*

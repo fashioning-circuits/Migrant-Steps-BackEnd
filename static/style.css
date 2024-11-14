@@ -1,0 +1,16 @@
+.node {
+    stroke: #000;
+    stroke-width: 1.5px;
+}
+
+.link {
+    stroke: #333;
+    stroke-width: 2px;
+    stroke-opacity: 0.9;
+}
+
+.highlight {
+    fill: red;
+    stroke: red;
+    stroke-width: 3px;
+}

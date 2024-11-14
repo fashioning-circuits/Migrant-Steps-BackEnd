@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Graph</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="Map.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <svg width="600" height="600"></svg>
+  <script>
+    const svg = d3.select("svg");
+    const link = svg.append("g").attr("class", "links")
+      .selectAll("line")
+      .data(links)
+      .enter().append("line")
+      .attr("class", "link");
+
+    const node = svg.append("g").attr("class", "nodes")
+      .selectAll("circle")
+      .data(nodes)
+      .enter().append("circle")
+      .attr("class", "node")
+      .attr("r", 10)
+      .attr("fill", d => currentID.has(d.id) ? "red" : unlockable.has(d.id) ? "green" : "black")
+      .on("click", (event, d) => console.log(`Node clicked: ${d.id}`));
+
+    node.append("title").text(d => `Node ${d.id}`);
+
+    link.attr("x1", d => nodes[d.source].x)
+      .attr("y1", d => nodes[d.source].y)
+      .attr("x2", d => nodes[d.target].x)
+      .attr("y2", d => nodes[d.target].y);
+
+    node.attr("cx", d => d.x).attr("cy", d => d.y);
+  </script>
+</body>
+
+</html>
