@@ -25,9 +25,17 @@
       .attr("class", "node")
       .attr("r", 10)
       .attr("fill", d => currentID.has(d.id) ? "red" : unlockable.has(d.id) ? "green" : "black")
-      .on("click", (event, d) => console.log(`Node clicked: ${d.id}`));
+      .on("click", (event, d) => {
+        console.log(`Node clicked: ${d.id}`)
 
-    node.append("title").text(d => `Node ${d.id}`);
+        if (unlockable.has(d.id)) {
+          fetch(`/excerpts/${encodeURIComponent(d.mongodbID)}`)
+          .then(response => response.json())
+          .then(excerpt => console.log(excerpt));
+        }
+      });
+
+    node.append("title").text(d => `Node ${d.mongodbID}`);
 
     link.attr("x1", d => nodes[d.source].x)
       .attr("y1", d => nodes[d.source].y)

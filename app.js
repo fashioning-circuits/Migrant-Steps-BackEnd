@@ -5,7 +5,8 @@ const express = require('express');
 const cookieParser = require("cookie-parser");
 const sessions = require('express-session');
 var SQLiteStore = require('connect-sqlite3')(sessions);
-const mongoose = require('mongoose');  
+const mongoose = require('mongoose');
+const Excerpt = require('./models/Excerpt.js'); 
 const cors = require('cors');
 require('dotenv/config'); //Specify all credentials in .env
 
@@ -203,6 +204,26 @@ mongoose.connect(
     }
 );
 
+/*
+Functionality: Gets a document from the Excerpt collection in MongoDB by its id
+Params: _id of the MongoDB Document
+Returns: MongoDB Document in HTTP Format
+*/
+app.get('/excerpts/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const excerpt = await Excerpt.findOne({ _id: id });
+
+        if (!excerpt) {
+            return res.status(404).json({ message: 'Excerpt not found' });
+        }
+
+        return res.status(200).json(excerpt);
+
+    } catch (error) {
+        console.log(error.message);
+    }
+});
 
 /*
 Functionality: The final part of the application that launches it in the browser.
