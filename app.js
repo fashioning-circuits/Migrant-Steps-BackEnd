@@ -196,13 +196,49 @@ Functionality: Establishes the MongoDB connection from our backend application u
 Params:
 Returns: Prints a message in the console on a successful connection to MongoDB
 */
-mongoose.set("strictQuery", false);
-mongoose.connect(
-    process.env.DB_CONNECTION, 
-    () => {
-        console.log('Connected to MongoDB');
+mongoose.connect(process.env.DB_CONNECTION, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(async () => {
+        const db = mongoose.connection.db;
+        console.log('Connected to database:', mongoose.connection.name);
+        const documents = await db.collection('Excerpt').find().toArray();
+        console.log('Raw documents from Excerpt:', documents);
+    })
+    .catch(err => console.error('MongoDB connection error:', err.message));
+
+
+async function listAllCollections() {
+    try {
+        // Access the database object
+        const db = mongoose.connection.db;
+
+        // List all collections
+        const collections = await db.listCollections().toArray();
+
+        console.log('Collections in the database:');
+        collections.forEach(collection => console.log(collection.name));
+    } catch (error) {
+        console.error('Error listing collections:', error.message);
     }
-);
+}
+
+// Function to fetch all documents
+async function fetchAllDocuments() {
+    try {
+        console.log('Fetching all documents from the Excerpt collection...');
+        const documents = await Excerpt.find(); // Fetch all documents
+
+        if (documents.length === 0) {
+            console.log('No documents found in the collection.');
+        } else {
+            console.log('Documents:');
+            console.log(documents); // Print documents to the console
+        }
+    } catch (error) {
+        console.error('Error fetching documents:', error.message);
+    }
+}
+
+
 
 /*
 Functionality: Gets a document from the Excerpt collection in MongoDB by its id
@@ -211,17 +247,29 @@ Returns: MongoDB Document in HTTP Format
 */
 app.get('/excerpts/:id', async (req, res) => {
     try {
+        console.log('Request received');
+        console.log(req.params);
         const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            console.log('Invalid ID format');
+            return res.status(400).json({ message: 'Invalid ID format' });
+        }
+
+        console.log('Fetching excerpt...');
         const excerpt = await Excerpt.findOne({ _id: id });
 
         if (!excerpt) {
+            console.log('Excerpt not found');
             return res.status(404).json({ message: 'Excerpt not found' });
         }
 
+        console.log('Excerpt found:', excerpt);
         return res.status(200).json(excerpt);
 
     } catch (error) {
-        console.log(error.message);
+        console.error('Error occurred:', error.message);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 });
 
