@@ -2,6 +2,14 @@ const mongoose = require('mongoose');
 
 const ExcerptSchema = new mongoose.Schema({
     titleOfWork: { type: String, required: true }, // 'Title of the Work'
+    node_id: {
+        type: Number,
+        required: true,
+        validate: {
+            validator: (value) => Number.isInteger(value),
+            message: 'node_id must be an integer',
+        },
+    },
     notedBy: { type: String, required: true }, // 'Noted by'
     location: { type: String, default: null }, // Optional: 'Location'
     briefDescription: { type: String, required: true }, // 'Brief Description'

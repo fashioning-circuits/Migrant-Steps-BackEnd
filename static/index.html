@@ -29,13 +29,13 @@
         console.log(`Node clicked: ${d.id}`)
 
         if (unlockable.has(d.id)) {
-          fetch(`/excerpts/${encodeURIComponent(d.mongodbID)}`)
+          fetch(`/excerpts/${encodeURIComponent(d.id)}`)
           .then(response => response.json())
           .then(excerpt => console.log(excerpt));
         }
       });
 
-    node.append("title").text(d => `Node ${d.mongodbID}`);
+    node.append("title").text(d => `Node ${d.id}`);
 
     link.attr("x1", d => nodes[d.source].x)
       .attr("y1", d => nodes[d.source].y)

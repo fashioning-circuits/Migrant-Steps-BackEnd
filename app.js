@@ -251,13 +251,8 @@ app.get('/excerpts/:id', async (req, res) => {
         console.log(req.params);
         const { id } = req.params;
 
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            console.log('Invalid ID format');
-            return res.status(400).json({ message: 'Invalid ID format' });
-        }
-
         console.log('Fetching excerpt...');
-        const excerpt = await Excerpt.findOne({ _id: id });
+        const excerpt = await Excerpt.findOne({ node_id: id });
 
         if (!excerpt) {
             console.log('Excerpt not found');

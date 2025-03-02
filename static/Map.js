@@ -5,8 +5,8 @@ const current = [
 
 // All nodes of map
 const nodes = [
-    {id: 0, mongodbID:'66db660a6682a4534ea06a44'}, {id: 1, mongodbID:'66db660a6682a4534ea06a45'}, {id: 2,  mongodbID:'66db660a6682a4534ea06a46'},
-    {id: 3, mongodbID:'66db660a6682a4534ea06a47'}, {id: 4, mongodbID:'66db660a6682a4534ea06a48'}, {id: 5}, {id: 6}, {id: 7}, {id: 8}, {id: 9}, {id: 10}, {id: 11}, {id: 12}, {id: 13}, {id: 14}, {id: 15}, {id: 16}, {id: 17}, {id: 18}, {id: 19}
+    {id: 0}, {id: 1}, {id: 2},
+    {id: 3}, {id: 4}, {id: 5}, {id: 6}, {id: 7}, {id: 8}, {id: 9}, {id: 10}, {id: 11}, {id: 12}, {id: 13}, {id: 14}, {id: 15}, {id: 16}, {id: 17}, {id: 18}, {id: 19}
 ];
 
 // All links of map
