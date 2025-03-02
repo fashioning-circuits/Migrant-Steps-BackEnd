@@ -1,4 +1,5 @@
 // The user's currently unlocked nodes (will be obtained from db)
+
 const current = [
     {id: 0}, {id: 2}, {id: 3}, {id: 11}
 ];
