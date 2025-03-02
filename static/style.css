@@ -14,19 +14,3 @@
     stroke: red;
     stroke-width: 3px;
 }
-
-.unlockable {
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0% {
-        stroke: green;
-    }
-    50% {
-        stroke: yellow;
-    }
-    100% {
-        stroke: green;
-    }
-}
