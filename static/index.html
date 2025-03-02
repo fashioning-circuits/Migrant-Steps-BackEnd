@@ -22,6 +22,15 @@
         .enter().append("line")
         .attr("class", "link");
 
+        if (unlockable.has(d.id)) {
+          fetch(`/excerpts/${encodeURIComponent(d.id)}`)
+          .then(response => response.json())
+          .then(excerpt => console.log(excerpt));
+        }
+      });
+
+    node.append("title").text(d => `Node ${d.id}`);
+
       const node = svg.append("g").attr("class", "nodes")
         .selectAll("circle")
         .data(nodes)
@@ -39,6 +48,7 @@
 
       // demonstrate animation
       // nodes[20].classList.add("unlockable");
+
 
       node.append("title").text(d => `Node ${d.mongodbID}`);
       link.attr("x1", d => nodes[d.source].x)
