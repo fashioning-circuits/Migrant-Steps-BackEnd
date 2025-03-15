@@ -251,13 +251,33 @@ app.get('/excerpts/:id', async (req, res) => {
         console.log(req.params);
         const { id } = req.params;
 
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            console.log('Invalid ID format');
-            return res.status(400).json({ message: 'Invalid ID format' });
+        console.log('Fetching excerpt...');
+        const excerpt = await Excerpt.findOne({ node_id: id });
+
+        if (!excerpt) {
+            console.log('Excerpt not found');
+            return res.status(404).json({ message: 'Excerpt not found' });
         }
 
+        console.log('Excerpt found:', excerpt);
+        return res.status(200).json(excerpt);
+
+    } catch (error) {
+        console.error('Error occurred:', error.message);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+/*
+Functionality: Gets all documents from the Excerpt collection in MongoDB
+Params: 
+Returns: MongoDB Document in HTTP Format
+*/
+app.get('/excerpts', async (req, res) => {
+    try {
+
         console.log('Fetching excerpt...');
-        const excerpt = await Excerpt.findOne({ _id: id });
+        const excerpt = await Excerpt.find();
 
         if (!excerpt) {
             console.log('Excerpt not found');
