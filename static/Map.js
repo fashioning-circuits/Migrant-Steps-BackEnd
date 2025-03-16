@@ -42,11 +42,13 @@ async function requestExcerpts() {
   try {
     const response = await fetch('/excerpts');
     const excerpts = await response.json();
-    console.log('Excerpts recieved');
-
-    // asign an id to each excerpt and store it in nodes
+    // Sort excepts by node_id
+    excerpts.sort((a, b) => a.node_id - b.node_id);
+    console.log('Excerpts received');
+    nodes[0] = { id: 0, excerpt: excerpts[0] };
+    // assign an id to each excerpt and store it in nodes
     for (let i = 0; i < excerpts.length; i++) {
-      nodes[i] = { id: i, excerpt: excerpts[i] };
+      nodes[i+1] = { id: i+1, excerpt: excerpts[i] };
     }
   
     // ensures there are at least 19 nodes in the map to render correctly 
