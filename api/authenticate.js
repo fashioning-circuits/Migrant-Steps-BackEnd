@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
 require('dotenv/config'); //Specify all credentials in .env
+const otpGenerator = require('otp-generator');
 const Token = require('../models/Token');
 const User = require('../models/User');
-
+const OTP = require('../models/OTP');
+const nodemailer = require('nodemailer');
 
 /*
 Functionality: Initializes the Fitbit API client
@@ -43,15 +45,21 @@ router.get('/authorize', async(req, res) => {
     res.send(`
         <form action="/authenticate/process-email" method="post">
             Email: <input type="text" name="email" required><br>
+            <input type="radio" name="user_type" value="Manual" required>Manual<br>
+            <input type="radio" name="user_type" value="FitBit" required>FitBit<br>
             <input type="submit" value="Submit">
         </form>
     `);
 });
 
+// Processes the email based on typr of user
 router.post('/process-email', async(req, res) => {
-    const { email } = req.body;
-    const existingUser = await User.findOne({ email: email });
+    const { email, user_type } = req.body;
+    const existingUser = await User.findOne({ email: email, user_type: user_type });
+
+    // New User
     if (!existingUser) {
+    // Change when connected to frontend
       return res.send(`Create New User
         <form action="/authenticate/new-user" method="post">
             Email: <input type="text" name="email" value="${email}" readonly><br>
@@ -62,15 +70,64 @@ router.post('/process-email', async(req, res) => {
         </form>
         `);
     }
+
+    // Fitbit User
     console.log("Existing User:");
     if (existingUser.user_type == "FitBit") {
         console.log("FitBit");
         return res.redirect('./authorize-fitbit');
     }
+
+    // Manual User
     console.log("Manual");
-    return res.redirect('./authorize-otp');
+    // Sends a one-time password and awaits authentication
+    try {
+        let otp;
+        // Generates an otp
+        do {
+            otp = otpGenerator.generate(8, { specialChars: false });
+        } while (await OTP.findOne({ otp : otp }));
+
+        // Adds otp to database
+        await OTP.create({ email, otp });
+        console.log("New OTP saved");
+
+        // Create a Transporter to send emails
+        let transporter = nodemailer.createTransport({
+            service: 'gmail', // Need proper authentication in order to send email
+            auth: {
+                user: process.env.EMAIL_SENDER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+        console.log("Transporter created");
+
+        // Send emails to users
+        await transporter.sendMail({
+            from: process.env.EMAIL_SENDER,
+            to: email,
+            subject: "OTP Verification Email", // We can change subject and message as well
+            html: `<h1>Please confirm your OTP</h1>
+                   <p>Here is your OTP for verification: ${otp}</p>
+                   <br>
+                   <em>Do not reply to this email. This email address is being monitered.</em>`,
+        });
+        console.log("Email sent successfully");
+
+        // Change when connected to frontend
+        return res.send(`OTP sent successfully
+            <form action="/authenticate/authorize-otp" method="post">
+                Email: <input type="text" name="email" value="${email}" readonly><br>
+                OTP: <input type="text" name="otp" required><br>
+                <input type="submit" value="Submit">
+            </form>
+            `);
+    } catch (error) {
+        res.status(500).json({ message : error });
+    }
 });
 
+// Creates a new user and adds them to the database
 router.post('/new-user', async(req, res) => {
     try {
         const { email, user_type } = req.body;
@@ -95,8 +152,7 @@ router.post('/new-user', async(req, res) => {
         console.log (newUser);
         res.redirect("./authorize");
     } catch (error) {
-        console.log(error.message);
-        return res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ message : error });
     }
 });
 
@@ -113,9 +169,22 @@ router.get('/authorize-fitbit', async (req, res) => {
     res.redirect(authorize_url);
 });
 
-// Sends a one-time password and awaits authentication
-router.get('/authorize-otp', async(req, res) => {
-    res.send('OTP sending not yet implemented');
+// Checks if OTP is valid and authenticates if it is
+router.post('/authorize-otp', async(req, res) => {
+    const { email, otp } = req.body;
+    try {
+        const otpRecord = await OTP.findOne({ email, otp });
+
+        if (otpRecord) {
+            // Need to figure out how to create access tokens
+
+            return res.send('OTP verified successfully');
+        } else {
+            res.status(400).send('Invalid OTP'); // Pop up with error when connected to frontend
+        }
+    } catch (error) {
+        res.status(500).json({ message : error });
+    }
 });
 
 
