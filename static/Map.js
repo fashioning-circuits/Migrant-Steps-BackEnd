@@ -18,24 +18,7 @@ const unlockable = new Set();
 
 // All links of map
 const links = [
-  { source: 0, target: 2 }, { source: 0, target: 4 }, { source: 0, target: 7 }, { source: 0, target: 9 },
-  { source: 1, target: 2 }, { source: 1, target: 5 }, { source: 1, target: 6 }, { source: 1, target: 9 }, { source: 1, target: 10 }, { source: 1, target: 11 }, { source: 1, target: 18 },
-  { source: 2, target: 3 }, { source: 2, target: 4 }, { source: 2, target: 5 }, { source: 2, target: 8 }, { source: 2, target: 9 }, { source: 2, target: 10 }, { source: 2, target: 11 }, { source: 2, target: 12 },
-  { source: 3, target: 4 }, { source: 3, target: 9 }, { source: 3, target: 11 }, { source: 3, target: 12 }, { source: 3, target: 13 },
-  { source: 4, target: 5 }, { source: 4, target: 7 }, { source: 4, target: 12 }, { source: 4, target: 13 }, { source: 4, target: 14 },
-  { source: 5, target: 6 }, { source: 5, target: 13 }, { source: 5, target: 14 }, { source: 5, target: 15 },
-  { source: 6, target: 7 }, { source: 6, target: 9 }, { source: 6, target: 14 }, { source: 6, target: 15 }, { source: 6, target: 16 },
-  { source: 7, target: 8 }, { source: 7, target: 9 }, { source: 7, target: 15 }, { source: 7, target: 16 }, { source: 7, target: 17 },
-  { source: 8, target: 9 }, { source: 8, target: 16 }, { source: 8, target: 17 }, { source: 8, target: 18 },
-  { source: 9, target: 10 }, { source: 9, target: 17 }, { source: 9, target: 18 },
-  { source: 10, target: 11 }, { source: 10, target: 18 },
-  { source: 11, target: 12 },
-  { source: 12, target: 13 },
-  { source: 13, target: 14 },
-  { source: 14, target: 15 },
-  { source: 15, target: 16 },
-  { source: 16, target: 17 },
-  { source: 17, target: 18 }
+  { source: 0, target: 2 }, { source: 0, target: 4 }, { source: 0, target: 7 }, { source: 0, target: 9 }
 ];
 
 async function requestExcerpts() {
@@ -49,8 +32,10 @@ async function requestExcerpts() {
     // assign an id to each excerpt and store it in nodes
     for (let i = 0; i < excerpts.length; i++) {
       nodes[i+1] = { id: i+1, excerpt: excerpts[i] };
+      for (let j = 0; j < excerpts[i].connections.length; j++) {
+        links.push({ source: i+1, target: excerpts[i].connections[j] });
+      }
     }
-  
     // ensures there are at least 19 nodes in the map to render correctly 
     // added extra dummy node for demo purposes
     count = 0;
